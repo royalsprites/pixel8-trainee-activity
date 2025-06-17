@@ -1,32 +1,39 @@
 <template>
-  <q-page class="q-pa-md">
+  <q-page class="q-pa-md q-gutter-md">
     <q-card class="q-pa-md shadow-2 rounded-borders">
-      <q-card-section>
+      <q-card-section class="q-px-none">
         <div class="text-h5 text-primary">Finished Tasks</div>
       </q-card-section>
 
       <q-separator />
 
       <q-card-section>
-        <q-list bordered separator v-if="finishedTasks.length > 0">
+        <div v-if="finishedTasks.length === 0" class="text-subtitle1 text-grey-7">
+          No finished tasks yet. Get to work!
+        </div>
+
+        <q-list v-else bordered separator>
           <q-item v-for="task in finishedTasks" :key="task.id">
             <q-item-section>
-              <div class="text-strike text-grey">{{ task.title }}</div>
+              <div class="text-grey-7">
+                <q-icon name="check_circle" color="positive" class="q-mr-sm" />
+                {{ task.title }}
+              </div>
             </q-item-section>
             <q-item-section side>
               <q-btn
-                flat
                 icon="delete"
                 color="negative"
-                @click="removeFinishedTask(task.id)"
-              />
+                flat
+                round
+                dense
+                @click="confirmDelete(task.id)"
+              >
+                <q-tooltip>Delete</q-tooltip>
+              </q-btn>
             </q-item-section>
           </q-item>
         </q-list>
-
-        <div v-else class="text-grey text-center q-py-lg">
-          No finished tasks yet
-        </div>
       </q-card-section>
     </q-card>
   </q-page>
@@ -38,16 +45,18 @@ import { ref, onMounted } from 'vue'
 const finishedTasks = ref([])
 
 onMounted(() => {
-  fetchFinishedTasks()
+  const saved = localStorage.getItem('finishedTasks')
+  if (saved) {
+    try {
+      finishedTasks.value = JSON.parse(saved)
+    } catch (e) {
+      console.error('Failed to load finished tasks:', e)
+    }
+  }
 })
 
-const fetchFinishedTasks = () => {
-  const savedFinishedTasks = localStorage.getItem('finishedTasks')
-  finishedTasks.value = savedFinishedTasks ? JSON.parse(savedFinishedTasks) : []
-}
-
-const removeFinishedTask = (id) => {
-  finishedTasks.value = finishedTasks.value.filter(task => task.id !== id)
+const confirmDelete = (id) => {
+  finishedTasks.value = finishedTasks.value.filter(t => t.id !== id)
   localStorage.setItem('finishedTasks', JSON.stringify(finishedTasks.value))
 }
 </script>
