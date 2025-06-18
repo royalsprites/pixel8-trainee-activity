@@ -138,30 +138,10 @@ const loadLocalTasks = () => {
   }
 }
 
-const saveLocalTasks = () => {
-  localStorage.setItem('localTasks', JSON.stringify(localTasks.value))
-}
-
-const loadFinishedTasks = () => {
-  const savedFinished = localStorage.getItem('finishedTasks')
-  if (savedFinished) {
-    try {
-      finishedTasks.value = JSON.parse(savedFinished)
-    } catch (e) {
-      console.error('Failed to parse finished tasks:', e)
-      finishedTasks.value = []
-    }
-  }
-}
-
-const saveFinishedTasks = () => {
-  localStorage.setItem('finishedTasks', JSON.stringify(finishedTasks.value))
-}
-
 const fetchTasks = async () => {
   try {
     const res = await api.get('https://jsonplaceholder.typicode.com/todos')
-    const apiTasks = res.data.filter(task => !task.completed)
+    const apiTasks = res.data.filter(task => !task.completed).slice(0, 10)
 
     const finishedIds = new Set(finishedTasks.value.map(t => t.id))
     const combined = [...localTasks.value, ...apiTasks]
@@ -214,6 +194,26 @@ const updateTask = async (task) => {
       message: 'Failed to update task'
     })
   }
+}
+
+const saveLocalTasks = () => {
+  localStorage.setItem('localTasks', JSON.stringify(localTasks.value))
+}
+
+const loadFinishedTasks = () => {
+  const savedFinished = localStorage.getItem('finishedTasks')
+  if (savedFinished) {
+    try {
+      finishedTasks.value = JSON.parse(savedFinished)
+    } catch (e) {
+      console.error('Failed to parse finished tasks:', e)
+      finishedTasks.value = []
+    }
+  }
+}
+
+const saveFinishedTasks = () => {
+  localStorage.setItem('finishedTasks', JSON.stringify(finishedTasks.value))
 }
 
 const confirmDelete = (id, fromFinished = false) => {
